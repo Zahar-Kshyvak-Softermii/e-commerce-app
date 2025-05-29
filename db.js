@@ -1,16 +1,15 @@
 const Sequelize = require("sequelize");
 require("dotenv").config();
 
-const sequelize = new Sequelize(
-  "e_commerce_app",
-  "postgres",
-  process.env.DB_PASS,
-  {
-    host: "localhost",
-    dialect: "postgres",
-    port: 5432,
-    logging: false,
-  }
-);
-
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  protocol: "postgres",
+  logging: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
+});
 module.exports = sequelize;
