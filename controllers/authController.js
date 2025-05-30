@@ -1,11 +1,22 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../validation/validationSchemes");
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const register = async (req, res) => {
+  const parse = registerSchema.safeParse(req.body);
+  if (!parse.success) {
+    return res
+      .status(400)
+      .json({ message: "Validation failed", errors: parse.error.errors });
+  }
+
   try {
     const { firstName, lastName, email, password } = req.body;
     const candidate = await User.findOne({ where: { email } });
@@ -29,12 +40,19 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  const parse = registerSchema.safeParse(req.body);
+  if (!parse.success) {
+    return res
+      .status(400)
+      .json({ message: "Validation failed", errors: parse.error.errors });
+  }
+
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email } });
     if (!user)
       return res.status(400).json({
-        message: "User with this email does not exist!",
+        message: "Wrong credentials!",
       });
 
     const isMatch = await bcrypt.compare(password, user.password);
